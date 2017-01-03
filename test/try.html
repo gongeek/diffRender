@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="c"></div>
+<script src="../dist/diffRender.js"></script>
+<script>
+    var divElm = document.getElementById('c'),
+            patch = DiffRender.patch;
+    patch(divElm, '<div id="c"><li>a</li><li>c</li><li>e</li><li>b</li><li>h</li></div>')
+</script>
+</body>
+</html>
