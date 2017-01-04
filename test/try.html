@@ -11,9 +11,9 @@
     var divElm = document.getElementById('c'),
             patch = DiffRender.patch,
             oldVnode;
-    oldVnode = patch(divElm, '<li>a</li><li>c</li><li>e</li><li>b</li><li>h</li>')
+    oldVnode = patch(divElm, '<li class="he">a</li><li>c</li><li>e</li><li>b</li><li>h</li>')
     console.time('updateStart:');
-    patch(oldVnode, '<li class="hh">b</li><li>c</li><li>e</li><li>b</li><li>h</li>')
+    patch(oldVnode, '<li class="hh">b</li><li class="kl">c</li><li>e</li><li>b</li><li>h</li>')
     console.timeEnd('updateStart:');
     //    console.time('innerHTMLStart:');
     //    divElm.innerHTML = '<li>d</li><li>c</li><li>e</li><li>b</li><li>h</li>';

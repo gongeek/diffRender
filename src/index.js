@@ -1,6 +1,7 @@
 import HtmlParser from './lib/htmlparser'
 import Snabbdom from './lib/snabbdom/index'
-var patchFn = Snabbdom.init([]);
+import AttrCb from  './lib/snabbdom/modules/attributes'
+var patchFn = Snabbdom.init([AttrCb]);
 var htmlParser = new HtmlParser();
 var DiffRender = {};
 DiffRender.domlog = window.location.href.indexOf('domlog') !== -1;
