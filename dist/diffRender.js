@@ -532,8 +532,8 @@ function updateAttrs(oldVnode, vnode) {
     var key,
         cur, old,
         elm = vnode.elm,
-        oldAttrs = oldVnode.data.attr,
-        attrs = vnode.data.attr;
+        oldAttrs = oldVnode.data && oldVnode.data.attr,
+        attrs = vnode.data && vnode.data.attr;
     if (!oldAttrs && !attrs) return;
     oldAttrs = oldAttrs || {};
     attrs = attrs || {};
