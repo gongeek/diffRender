@@ -2,7 +2,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
     (global.DiffRender = factory());
-}(this, (function () { 'use strict';
+}(this, (function () {
 
 function HtmlParser() {
 }
@@ -12,9 +12,10 @@ HtmlParser.prototype = {
     endTagRe: /^<\/([^>\s]+)[^>]*>/m,
     attrRe: /([^=\/\s]+)(\s*=\s*((\"([^"]*)\")|(\'([^']*)\')|[^>\s]+))?/gm,
     stack: [],
-    parse: function (s) {
+    parse: function (s, rootSel) {
+        DiffRender && DiffRender.timelog && console.time('parseHTMLCost');
         var vnode = {
-            sel: 'div',
+            sel: rootSel || 'div',
             children: [],
             isRoot: true
         };
@@ -73,7 +74,8 @@ HtmlParser.prototype = {
         if (vnode.children.length === 0) {
             throw new Error('HTML不标准,请检查标签是否闭合!');
         }
-        return vnode.children.length === 1 ? vnode.children[0] : vnode;
+        DiffRender && DiffRender.timelog && console.timeEnd('parseHTMLCost');
+        return vnode;
     },
     setStackTopNode: function (cb) {
         var top = this.stack[this.stack.length - 1];
@@ -106,12 +108,13 @@ HtmlParser.prototype = {
                 }
                 vnode.children.push({
                     sel: sTagName,
-                    data: {attr: attrs}
+                    data: {attr: attrs},
+                    key: attrs.key || ''
                 });
             });
             return;
         }
-        this.stack.push({sel: sTagName, data: {attr: attrs}});
+        this.stack.push({sel: sTagName, data: {attr: attrs}, key: attrs.key || ''});
     },
 
     parseEndTag: function (sTag, sTagName) {
@@ -209,18 +212,24 @@ function tagName(node) {
 function setTextContent(node, text) {
     node.textContent = text;
 }
-
+// add dom log
+function wrapDomApi(fn) {
+    return function (a1, a2, a3) {
+        DiffRender && DiffRender.domlog && console.log(a1.outerHTML || '', ' ' + fn.name + ' ', a2 || '', a3 || '');
+        fn(a1, a2, a3);
+    };
+}
 var domApi = {
     createElement: createElement,
     createElementNS: createElementNS,
     createTextNode: createTextNode,
-    appendChild: appendChild,
-    removeChild: removeChild,
-    insertBefore: insertBefore,
+    appendChild: wrapDomApi(appendChild),
+    removeChild: wrapDomApi(removeChild),
+    insertBefore: wrapDomApi(insertBefore),
     parentNode: parentNode,
     nextSibling: nextSibling,
     tagName: tagName,
-    setTextContent: setTextContent
+    setTextContent: wrapDomApi(setTextContent)
 };
 
 var emptyNode = Vnode('', {}, [], undefined, undefined);
@@ -305,7 +314,9 @@ function init(modules, api) {
             }
             // 运行module的create回调
             for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode);
-            i = vnode.data && vnode.data.hook; // Reuse variable
+            if (vnode.data) {
+                i = vnode.data.hook; // Reuse variable
+            }
             if (isDef(i)) {
                 // hook 中的cb
                 if (i.create) i.create(emptyNode, vnode);
@@ -498,6 +509,7 @@ function init(modules, api) {
             insertedVnodeQueue[i].data.hook.insert(insertedVnodeQueue[i]);
         }
         for (i = 0; i < cbs.post.length; ++i) cbs.post[i]();
+        DiffRender && DiffRender.timelog && console.timeEnd('patchCost');
         return vnode;
     };
 }
@@ -506,20 +518,31 @@ var Snabbdom = {init: init};
 
 var patchFn = Snabbdom.init([]);
 var htmlParser = new HtmlParser();
-
+var DiffRender$1 = {};
+DiffRender$1.domlog = window.location.href.indexOf('domlog') !== -1;
+DiffRender$1.timelog = window.location.href.indexOf('timelog') !== -1;
 function patch(el, str) {
+    var id, c, selRoot;
+    DiffRender$1.timelog && console.time('patchCost');
+    if (el.tagName) {
+        id = el.id ? '#' + el.id : '';
+        c = el.className ? '.' + el.className.split(' ').join('.') : '';
+        selRoot = el.tagName.toLowerCase() + id + c;
+    }
+    if (!selRoot && el.isRoot) {
+        selRoot = el.sel;
+    }
     if (typeof el === 'string') {
-        el = htmlParser.parse(el);
+        el = htmlParser.parse(el, selRoot);
     }
     if (typeof str === 'string') {
-        str = htmlParser.parse(str);
+        str = htmlParser.parse(str, selRoot);
     }
-    patchFn(el, str);
+    return patchFn(el, str);
 }
 
+DiffRender$1.patch = patch;
 
-var index = {patch: patch};
-
-return index;
+return DiffRender$1;
 
 })));

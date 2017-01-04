@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ul id="c">
+</ul>
+<script src="../dist/diffRender.js"></script>
+<script>
+    var divElm = document.getElementById('c'),
+            patch = DiffRender.patch,
+            oldVnode;
+    oldVnode = patch(divElm, '<li key="a"><div>a</div><span>...</span></li><li key="y"><div>y</div><span>...</span></li><li key="c"><div>c</div><span>...</span></li><li key="g"><div>g</div><span>...</span></li><li key="b"><div>b</div><span>...</span></li>')
+    patch(oldVnode, '<li key="a"><div>a</div><span>...</span></li><li key="c"><div>c</div><span>...</span></li><li key="e"><div>e</div><span>...</span></li><li key="b"><div>b</div><span>...</span></li><li key="h"><div>h</div><span>...</span></li>')
+</script>
+</body>
+</html>

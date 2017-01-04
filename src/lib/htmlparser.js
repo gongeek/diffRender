@@ -6,9 +6,10 @@ HtmlParser.prototype = {
     endTagRe: /^<\/([^>\s]+)[^>]*>/m,
     attrRe: /([^=\/\s]+)(\s*=\s*((\"([^"]*)\")|(\'([^']*)\')|[^>\s]+))?/gm,
     stack: [],
-    parse: function (s) {
+    parse: function (s, rootSel) {
+        DiffRender && DiffRender.timelog && console.time('parseHTMLCost');
         var vnode = {
-            sel: 'div',
+            sel: rootSel || 'div',
             children: [],
             isRoot: true
         };
@@ -67,7 +68,8 @@ HtmlParser.prototype = {
         if (vnode.children.length === 0) {
             throw new Error('HTML不标准,请检查标签是否闭合!');
         }
-        return vnode.children.length === 1 ? vnode.children[0] : vnode;
+        DiffRender && DiffRender.timelog && console.timeEnd('parseHTMLCost');
+        return vnode;
     },
     setStackTopNode: function (cb) {
         var top = this.stack[this.stack.length - 1];
@@ -100,12 +102,13 @@ HtmlParser.prototype = {
                 }
                 vnode.children.push({
                     sel: sTagName,
-                    data: {attr: attrs}
+                    data: {attr: attrs},
+                    key: attrs.key || ''
                 });
             });
             return;
         }
-        this.stack.push({sel: sTagName, data: {attr: attrs}});
+        this.stack.push({sel: sTagName, data: {attr: attrs}, key: attrs.key || ''});
     },
 
     parseEndTag: function (sTag, sTagName) {

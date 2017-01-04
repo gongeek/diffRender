@@ -39,16 +39,22 @@ function tagName(node) {
 function setTextContent(node, text) {
     node.textContent = text;
 }
-
+// add dom log
+function wrapDomApi(fn) {
+    return function (a1, a2, a3) {
+        DiffRender && DiffRender.domlog && console.log(a1.outerHTML || '', ' ' + fn.name + ' ', a2 || '', a3 || '');
+        fn(a1, a2, a3);
+    };
+}
 export default  {
     createElement: createElement,
     createElementNS: createElementNS,
     createTextNode: createTextNode,
-    appendChild: appendChild,
-    removeChild: removeChild,
-    insertBefore: insertBefore,
+    appendChild: wrapDomApi(appendChild),
+    removeChild: wrapDomApi(removeChild),
+    insertBefore: wrapDomApi(insertBefore),
     parentNode: parentNode,
     nextSibling: nextSibling,
     tagName: tagName,
-    setTextContent: setTextContent
+    setTextContent: wrapDomApi(setTextContent)
 };

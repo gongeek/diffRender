@@ -84,7 +84,9 @@ function init(modules, api) {
             }
             // 运行module的create回调
             for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode);
-            i = vnode.data && vnode.data.hook; // Reuse variable
+            if (vnode.data) {
+                i = vnode.data.hook; // Reuse variable
+            }
             if (isDef(i)) {
                 // hook 中的cb
                 if (i.create) i.create(emptyNode, vnode);
@@ -277,6 +279,7 @@ function init(modules, api) {
             insertedVnodeQueue[i].data.hook.insert(insertedVnodeQueue[i]);
         }
         for (i = 0; i < cbs.post.length; ++i) cbs.post[i]();
+        DiffRender && DiffRender.timelog && console.timeEnd('patchCost');
         return vnode;
     };
 }

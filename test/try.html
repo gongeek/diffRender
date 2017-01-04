@@ -9,8 +9,15 @@
 <script src="../dist/diffRender.js"></script>
 <script>
     var divElm = document.getElementById('c'),
-            patch = DiffRender.patch;
-    patch(divElm, '<div id="c"><li>a</li><li>c</li><li>e</li><li>b</li><li>h</li></div>')
+            patch = DiffRender.patch,
+            oldVnode;
+    oldVnode = patch(divElm, '<li>a</li><li>c</li><li>e</li><li>b</li><li>h</li>')
+    console.time('updateStart:');
+    patch(oldVnode, '<li class="hh">b</li><li>c</li><li>e</li><li>b</li><li>h</li>')
+    console.timeEnd('updateStart:');
+    //    console.time('innerHTMLStart:');
+    //    divElm.innerHTML = '<li>d</li><li>c</li><li>e</li><li>b</li><li>h</li>';
+    //    console.timeEnd('innerHTMLStart:');
 </script>
 </body>
 </html>
