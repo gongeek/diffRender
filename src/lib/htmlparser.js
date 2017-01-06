@@ -1,5 +1,40 @@
+import orVnode from './snabbdom/vnode'
+
 export default function HtmlParser() {
 }
+
+var decoder = document.createElement('div');
+var decodeHTMLCached;
+
+function cached(fn) {
+    var cache = Object.create(null);
+    return function cachedFn(str) {
+        var hit = cache[str];
+        return hit || (cache[str] = fn(str))
+    }
+}
+function decodeHTML(html) {
+    decoder.innerHTML = html;
+    return decoder.textContent;
+}
+decodeHTMLCached = cached(decodeHTML);
+function Vnode(sel, data, children, text, elm) {
+    if (data && data.attr && data.attr.hasOwnProperty('bx-name')) {
+        data.hook = data.hook || {};
+        data.hook.insert = function () {
+
+        };
+        data.hook.update = function () {
+
+        };
+        data.hook.create = function () {
+
+        };
+    }
+    return orVnode(sel, data, children, text, elm);
+}
+
+
 HtmlParser.prototype = {
     handler: null,
     startTagRe: /^<([^>\s\/]+)((\s+[^=>\s]+(\s*=\s*((\"[^"]*\")|(\'[^']*\')|[^>\s]+))?)*)\s*\/?\s*>/m,
@@ -85,30 +120,23 @@ HtmlParser.prototype = {
                 vnode.children.push({sel: 'span', text: text});
                 return;
             }
-            vnode.text = text;
+            vnode.text = decodeHTMLCached(text);
         })
     },
     parseStartTag: function (sTag, sTagName, sRest) {
         var attrs = this.parseAttributes(sTagName, sRest);
-        if (sTag.substr(-2) === '/>') {
+        if (sTag.substr(-2) === '/>' || sTagName === 'input' || sTagName === 'br' || sTagName === 'img') {
             this.setStackTopNode(function (vnode) {
                 vnode.children = vnode.children || [];
                 if (vnode.text) {
-                    vnode.children.push({
-                        sel: 'span',
-                        text: vnode.text
-                    });
+                    vnode.children.push(Vnode('span', undefined, undefined, vnode.text));
                     delete vnode.text;
                 }
-                vnode.children.push({
-                    sel: sTagName,
-                    data: {attr: attrs},
-                    key: attrs.key || ''
-                });
+                vnode.children.push(Vnode(sTagName, {attr: attrs}));
             });
             return;
         }
-        this.stack.push({sel: sTagName, data: {attr: attrs}, key: attrs.key || ''});
+        this.stack.push(Vnode(sTagName, {attr: attrs}));
     },
 
     parseEndTag: function (sTag, sTagName) {
@@ -116,10 +144,7 @@ HtmlParser.prototype = {
         this.setStackTopNode(function (vnode) {
             vnode.children = vnode.children || [];
             if (vnode.text) {
-                vnode.children.push({
-                    sel: 'span',
-                    text: vnode.text
-                });
+                vnode.children.push(Vnode('span', undefined, undefined, vnode.text));
                 delete vnode.text;
             }
             vnode.children.push(node);

@@ -13,6 +13,7 @@ function patch(el, str) {
         id = el.id ? '#' + el.id : '';
         c = el.className ? '.' + el.className.split(' ').join('.') : '';
         selRoot = el.tagName.toLowerCase() + id + c;
+        el.innerHTML = ''; //初始化时先清空
     }
     if (!selRoot && el.isRoot) {
         selRoot = el.sel;
@@ -27,5 +28,5 @@ function patch(el, str) {
 }
 
 DiffRender.patch = patch;
-
+window.DiffRender = DiffRender;
 export default DiffRender;
