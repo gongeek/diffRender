@@ -31,18 +31,6 @@ function decodeHTML(html) {
 }
 decodeHTMLCached = cached(decodeHTML);
 function Vnode(sel, data, children, text, elm) {
-    if (data && data.attr && data.attr.hasOwnProperty('bx-name')) {
-        data.hook = data.hook || {};
-        data.hook.insert = function () {
-
-        };
-        data.hook.update = function () {
-
-        };
-        data.hook.create = function () {
-
-        };
-    }
     return Vnode$1(sel, data, children, text, elm);
 }
 
